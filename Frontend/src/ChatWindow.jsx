@@ -3,6 +3,8 @@ import Chat from "./Chat.jsx";
 import { MyContext } from "./MyContext.jsx";
 import { useContext, useState, useEffect } from "react";
 import {ScaleLoader} from "react-spinners";
+const BACKEND_URL = "https://sigmagpt-m3k5.onrender.com";
+
 
 function ChatWindow() {
     const {prompt, setPrompt, reply, setReply, currThreadId, setPrevChats, setNewChat} = useContext(MyContext);
@@ -26,7 +28,7 @@ function ChatWindow() {
         };
 
         try {
-            const response = await fetch("https://sigmagpt-m3k5.onrender.com/api/chat", options);
+            const response = await fetch(`${BACKEND_URL}/api/chat`, options);
             const res = await response.json();
             console.log(res);
             setReply(res.reply);
@@ -53,6 +55,23 @@ function ChatWindow() {
         setPrompt("");
     }, [reply]);
 
+    useEffect(() => {
+    const fetchThread = async () => {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/thread/${currThreadId}`);
+            const data = await res.json();
+            if (data?.messages) {
+                setPrevChats(data.messages);
+                setNewChat(false);
+            }
+        } catch (err) {
+            console.log("No previous chat");
+        }
+    };
+    fetchThread();
+}, []);
+
+
 
     const handleProfileClick = () => {
         setIsOpen(!isOpen);
@@ -69,9 +88,9 @@ function ChatWindow() {
             {
                 isOpen && 
                 <div className="dropDown">
-                    <div className="dropDownItem"><i class="fa-solid fa-gear"></i> Settings</div>
-                    <div className="dropDownItem"><i class="fa-solid fa-cloud-arrow-up"></i> Upgrade plan</div>
-                    <div className="dropDownItem"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
+                    <div className="dropDownItem"><i className="fa-solid fa-gear"></i> Settings</div>
+                    <div className="dropDownItem"><i className="fa-solid fa-cloud-arrow-up"></i> Upgrade plan</div>
+                    <div className="dropDownItem"><i className="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
                 </div>
             }
             <Chat></Chat>
@@ -84,7 +103,8 @@ function ChatWindow() {
                     <input placeholder="Ask anything"
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter'? getReply() : ''}
+                       onKeyDown={(e) => e.key === "Enter" && getReply()}
+
                     >
                            
                     </input>
