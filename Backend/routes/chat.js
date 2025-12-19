@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import Thread from "../models/thread.js";
+import Thread from "../models/Thread.js";
 import getOpenAIAPIResponse from "../utils/openai.js";
 
 //testing route
